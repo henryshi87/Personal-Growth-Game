@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Personal Growth Radar</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121a33; --panel2:#0f1730; --text:#e8ecff; --muted:#aab3da;
+      --accent:#6aa6ff; --good:#34d399; --warn:#fbbf24; --bad:#fb7185;
+      --border:rgba(255,255,255,.10);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(180deg,#070b17, #0b1020 60%, #070b17);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--accent)}
+    .wrap{max-width:1100px; margin:0 auto; padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom);}
+    header{padding:14px 2px 10px;}
+    header h1{margin:0 0 6px; font-size:18px; font-weight:750; letter-spacing:.2px}
+    header p{margin:0; color:var(--muted); font-size:12px; line-height:1.35}
+    .card{background:linear-gradient(180deg,var(--panel), var(--panel2)); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow: var(--shadow);}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .grow{flex:1 1 auto}
+    label{font-size:12px; color:var(--muted)}
+    input[type="number"], input[type="text"]{
+      background:#0a1025; border:1px solid var(--border); color:var(--text);
+      border-radius:12px; padding:10px 12px; outline:none;
+    }
+    input[type="number"]{width:92px}
+    input[type="text"]{width:100%}
+    button{
+      background:#0a1025; border:1px solid var(--border); color:var(--text);
+      border-radius:12px; padding:10px 12px; cursor:pointer;
+      touch-action: manipulation;
+    }
+    button.primary{background:rgba(106,166,255,.15); border-color:rgba(106,166,255,.35)}
+    button.danger{background:rgba(251,113,133,.15); border-color:rgba(251,113,133,.35)}
+    button.small{padding:7px 10px; border-radius:10px; font-size:12px}
+    button:active{transform:translateY(1px)}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--border); background:#0a1025; font-size:12px;}
+    .dot{width:9px; height:9px; border-radius:999px; background:var(--accent); display:inline-block}
+    .dot.good{background:var(--good)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .hint{color:var(--muted); font-size:12px; line-height:1.4}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    .tabs{
+      position:sticky; top:0;
+      z-index:10;
+      padding:8px 0 10px;
+      background:linear-gradient(180deg, rgba(11,16,32,.92), rgba(11,16,32,.65));
+      backdrop-filter: blur(10px);
+    }
+    .tabbar{display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;}
+    .tabbar button{width:100%; font-weight:650}
+    .tabbar button.active{background:rgba(106,166,255,.18); border-color:rgba(106,166,255,.42)}
+    .panel{display:none; margin-top:10px;}
+    .panel.active{display:block;}
+    .kpi{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px;}
+    .mini{background:#0a1025; border:1px solid var(--border); border-radius:14px; padding:10px;}
+    .mini .v{font-weight:800; font-size:16px; line-height:1.15}
+    .mini .t{color:var(--muted); font-size:11px; margin-top:3px; line-height:1.2}
+    .svgwrap{display:flex; justify-content:center; align-items:center;}
+    .legend{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .legend .pill{cursor:default; padding:7px 10px}
+    .skillToday{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
+    .skillCard{background:#0a1025; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px;}
+    .skillTop{display:flex; justify-content:space-between; gap:10px; align-items:center;}
+    .skillName{font-weight:700; font-size:13px;}
+    .skillMeta{color:var(--muted); font-size:11px;}
+    .btns{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .btns .small{min-width:44px}
+    .split2{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;}
+    @media (max-width: 520px){
+      .kpi{grid-template-columns: repeat(2, 1fr);}
+      .tabbar{grid-template-columns: repeat(2, 1fr); }
+      input[type="number"]{width:86px}
+      .split2{grid-template-columns: 1fr;}
+    }
+    table{width:100%; border-collapse:collapse; font-size:12px;}
+    th, td{border-bottom:1px solid rgba(255,255,255,.07); padding:8px 6px; vertical-align:middle}
+    th{color:var(--muted); font-weight:650; text-align:left; position:sticky; top:0; background:rgba(18,26,51,.92); backdrop-filter: blur(6px);}
+    .scroll{max-height:420px; overflow:auto; border:1px solid rgba(255,255,255,.07); border-radius:14px;}
+    .footer{color:var(--muted); font-size:12px; padding:10px 2px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Personal Growth Radar</h1>
+      <p>iPhone-first version. Add points daily (0–3 per skill). Rolling window → levels (0–10). Export/import for backup or moving to laptop.</p>
+    </header>
+
+    <div class="tabs">
+      <div class="tabbar">
+        <button id="tabToday" class="active">Today</button>
+        <button id="tabRadar">Radar</button>
+        <button id="tabHistory">History</button>
+        <button id="tabSettings">Settings</button>
+      </div>
+    </div>
+
+    <section class="panel active" id="panelToday">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div class="pill"><span class="dot good"></span><span id="asOf">As of</span></div>
+          <div class="btns">
+            <button class="small" id="resetTodayBtn">Reset today</button>
+            <button class="small danger" id="wipeAllBtn">Wipe all</button>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          Scoring: <span class="mono">+1</span> small learning, <span class="mono">+2</span> meaningful practice, <span class="mono">+3</span> shipped/applied. Daily cap per skill: 3.
+        </div>
+
+        <div class="skillToday" id="todaySkills"></div>
+
+        <div class="split2">
+          <div class="mini">
+            <div class="v" id="xpToday">0</div>
+            <div class="t">XP today (all skills)</div>
+          </div>
+          <div class="mini">
+            <div class="v" id="dailyQuest">—</div>
+            <div class="t">Daily quest (≥1 in 3 skills)</div>
+          </div>
+          <div class="mini">
+            <div class="v" id="prioritySkill">—</div>
+            <div class="t">Priority skill (lowest level)</div>
+          </div>
+          <div class="mini">
+            <div class="v" id="streak">0</div>
+            <div class="t">Daily quest streak</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button id="exportBtn" class="primary">Export JSON</button>
+          <button id="importBtn">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none"/>
+        </div>
+
+        <div class="footer">
+          Tip: if you switch browsers or devices, use Export/Import to transfer your data.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelRadar">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div class="pill"><span class="dot"></span><span>Current build (levels 0–10)</span></div>
+          <div class="pill"><span class="dot warn"></span><span class="mono" id="windowLabel">30d</span></div>
+        </div>
+
+        <div class="svgwrap" style="margin-top:12px">
+          <svg id="radarSvg" width="330" height="330" viewBox="0 0 360 360" role="img" aria-label="Radar chart"></svg>
+        </div>
+
+        <div class="legend" id="legend"></div>
+
+        <div class="kpi" id="kpis"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelHistory">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div class="pill"><span class="dot warn"></span><span>History</span></div>
+          <div class="row">
+            <label for="historyDays">Show days</label>
+            <input id="historyDays" type="number" min="7" max="60" step="1" value="14"/>
+          </div>
+        </div>
+
+        <div class="scroll" style="margin-top:10px">
+          <table id="logTable"></table>
+        </div>
+
+        <div class="footer">
+          History is separate from the rolling window used for levels.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panelSettings">
+      <div class="card">
+        <div class="row">
+          <div class="grow">
+            <label>Rolling window (days)</label><br/>
+            <input id="windowDays" type="number" min="7" max="120" step="1" value="30"/>
+          </div>
+          <div class="grow">
+            <label>Target XP for Level 10 (per window)</label><br/>
+            <input id="targetXP" type="number" min="10" max="300" step="1" value="60"/>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="row">
+          <button class="primary" id="addSkillBtn">Add skill</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          Keep 8–12 skills. You can rename/reorder/delete skills below.
+        </div>
+
+        <div id="skillList" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;"></div>
+
+        <div class="footer">
+          Note: deleting a skill removes it from the UI, but old history entries remain in the saved log.
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+(function(){
+  const STORAGE_KEY = "pg_radar_v2_ios";
+
+  const defaults = {
+    windowDays: 30,
+    targetXP: 60,
+    historyDays: 14,
+    activeTab: "today",
+    skills: [
+      {id: uid(), name: "Health & Fitness"},
+      {id: uid(), name: "Sleep & Recovery"},
+      {id: uid(), name: "English / Communication"},
+      {id: uid(), name: "Deep Work / Focus"},
+      {id: uid(), name: "Career / Research Output"},
+      {id: uid(), name: "Learning / Study"},
+      {id: uid(), name: "Relationships / Family"},
+      {id: uid(), name: "Finance / Life Admin"},
+      {id: uid(), name: "Mindset / Emotional Regulation"},
+      {id: uid(), name: "Fun / Curiosity"}
+    ],
+    log: {}
+  };
+
+  function uid(){ return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16); }
+
+  function todayStr(d=new Date()){
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const yyyy = x.getFullYear();
+    const mm = String(x.getMonth()+1).padStart(2,'0');
+    const dd = String(x.getDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function addDays(dateStr, delta){
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    dt.setDate(dt.getDate()+delta);
+    return todayStr(dt);
+  }
+
+  function structuredClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return structuredClone(defaults);
+      const parsed = JSON.parse(raw);
+      if(!parsed.skills || !parsed.log) return structuredClone(defaults);
+      return Object.assign(structuredClone(defaults), parsed);
+    }catch(e){
+      return structuredClone(defaults);
+    }
+  }
+
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  let state = load();
+
+  const el = {
+    tabToday: document.getElementById("tabToday"),
+    tabRadar: document.getElementById("tabRadar"),
+    tabHistory: document.getElementById("tabHistory"),
+    tabSettings: document.getElementById("tabSettings"),
+    panelToday: document.getElementById("panelToday"),
+    panelRadar: document.getElementById("panelRadar"),
+    panelHistory: document.getElementById("panelHistory"),
+    panelSettings: document.getElementById("panelSettings"),
+    asOf: document.getElementById("asOf"),
+    windowLabel: document.getElementById("windowLabel"),
+
+    todaySkills: document.getElementById("todaySkills"),
+    xpToday: document.getElementById("xpToday"),
+    dailyQuest: document.getElementById("dailyQuest"),
+    prioritySkill: document.getElementById("prioritySkill"),
+    streak: document.getElementById("streak"),
+
+    exportBtn: document.getElementById("exportBtn"),
+    importBtn: document.getElementById("importBtn"),
+    importFile: document.getElementById("importFile"),
+
+    radarSvg: document.getElementById("radarSvg"),
+    legend: document.getElementById("legend"),
+    kpis: document.getElementById("kpis"),
+
+    logTable: document.getElementById("logTable"),
+    historyDays: document.getElementById("historyDays"),
+
+    windowDays: document.getElementById("windowDays"),
+    targetXP: document.getElementById("targetXP"),
+    addSkillBtn: document.getElementById("addSkillBtn"),
+    skillList: document.getElementById("skillList"),
+
+    resetTodayBtn: document.getElementById("resetTodayBtn"),
+    wipeAllBtn: document.getElementById("wipeAllBtn"),
+  };
+
+  function clampInt(v, min, max){
+    v = parseInt(v, 10);
+    if(Number.isNaN(v)) v = min;
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function pointsFor(date, skillId){
+    return (state.log[date] && Number(state.log[date][skillId])) || 0;
+  }
+
+  function setPoints(date, skillId, pts){
+    pts = clampInt(pts, 0, 3);
+    if(!state.log[date]) state.log[date] = {};
+    state.log[date][skillId] = pts;
+
+    if(pts === 0){
+      delete state.log[date][skillId];
+      if(Object.keys(state.log[date]).length === 0) delete state.log[date];
+    }
+    save();
+    renderAll(false);
+  }
+
+  function bumpPoints(date, skillId, delta){
+    const cur = pointsFor(date, skillId);
+    setPoints(date, skillId, cur + delta);
+  }
+
+  function getWindowDates(){
+    const n = clampInt(state.windowDays, 7, 120);
+    const end = todayStr();
+    const dates = [];
+    for(let i=n-1;i>=0;i--) dates.push(addDays(end, -i));
+    return dates;
+  }
+
+  function getHistoryDates(){
+    const n = clampInt(state.historyDays, 7, 60);
+    const end = todayStr();
+    const dates = [];
+    for(let i=n-1;i>=0;i--) dates.push(addDays(end, -i));
+    return dates;
+  }
+
+  function xpInWindow(skillId){
+    const dates = getWindowDates();
+    let sum = 0;
+    for(const d of dates) sum += pointsFor(d, skillId);
+    return sum;
+  }
+
+  function levelFromXP(xp){
+    const target = clampInt(state.targetXP, 10, 300);
+    const lvl = Math.round(10 * (xp / target));
+    return Math.max(0, Math.min(10, lvl));
+  }
+
+  function dailyQuestCompletion(date){
+    let count = 0;
+    for(const s of state.skills){
+      if(pointsFor(date, s.id) >= 1) count++;
+    }
+    return count >= 3;
+  }
+
+  function streakDailyQuest(){
+    const dates = getWindowDates().slice().reverse();
+    let streak = 0;
+    for(const d of dates){
+      if(dailyQuestCompletion(d)) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function lowestLevelSkill(){
+    let best = null;
+    for(const s of state.skills){
+      const xp = xpInWindow(s.id);
+      const lvl = levelFromXP(xp);
+      if(!best || lvl < best.lvl || (lvl === best.lvl && xp < best.xp)){
+        best = {id:s.id, name:s.name, lvl, xp};
+      }
+    }
+    return best;
+  }
+
+  function setTab(name){
+    state.activeTab = name;
+    save();
+    const map = {
+      today: [el.tabToday, el.panelToday],
+      radar: [el.tabRadar, el.panelRadar],
+      history: [el.tabHistory, el.panelHistory],
+      settings: [el.tabSettings, el.panelSettings]
+    };
+    for(const [k, pair] of Object.entries(map)){
+      const btn = pair[0], panel = pair[1];
+      btn.classList.toggle("active", k === name);
+      panel.classList.toggle("active", k === name);
+    }
+    renderAll(true);
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+
+  el.tabToday.addEventListener("click", ()=>setTab("today"));
+  el.tabRadar.addEventListener("click", ()=>setTab("radar"));
+  el.tabHistory.addEventListener("click", ()=>setTab("history"));
+  el.tabSettings.addEventListener("click", ()=>setTab("settings"));
+
+  el.windowDays.addEventListener("change", ()=>{
+    state.windowDays = clampInt(el.windowDays.value, 7, 120);
+    save(); renderAll(false);
+  });
+  el.targetXP.addEventListener("change", ()=>{
+    state.targetXP = clampInt(el.targetXP.value, 10, 300);
+    save(); renderAll(false);
+  });
+  el.historyDays.addEventListener("change", ()=>{
+    state.historyDays = clampInt(el.historyDays.value, 7, 60);
+    save(); renderAll(false);
+  });
+
+  el.exportBtn.addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "personal_growth_radar_export.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  el.importBtn.addEventListener("click", ()=>el.importFile.click());
+
+  el.importFile.addEventListener("change", async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    try{
+      const text = await f.text();
+      const parsed = JSON.parse(text);
+      if(!parsed.skills || !parsed.log) throw new Error("Invalid file format.");
+
+      state.windowDays = clampInt(parsed.windowDays ?? defaults.windowDays, 7, 120);
+      state.targetXP = clampInt(parsed.targetXP ?? defaults.targetXP, 10, 300);
+      state.historyDays = clampInt(parsed.historyDays ?? defaults.historyDays, 7, 60);
+      state.activeTab = parsed.activeTab ?? state.activeTab;
+
+      state.skills = Array.isArray(parsed.skills) ? parsed.skills.filter(x => x && x.id && x.name) : structuredClone(defaults.skills);
+      state.log = parsed.log && typeof parsed.log === "object" ? parsed.log : {};
+      save(); renderAll(false);
+      alert("Imported successfully.");
+    }catch(err){
+      alert("Import failed: " + err.message);
+    }finally{
+      el.importFile.value = "";
+    }
+  });
+
+  el.addSkillBtn.addEventListener("click", ()=>{
+    const name = prompt("Skill name:");
+    if(!name) return;
+    state.skills.push({id: uid(), name: name.trim()});
+    save(); renderAll(false);
+  });
+
+  el.resetTodayBtn.addEventListener("click", ()=>{
+    const d = todayStr();
+    if(!state.log[d]) return;
+    if(!confirm("Reset all points for today?")) return;
+    delete state.log[d];
+    save(); renderAll(false);
+  });
+
+  el.wipeAllBtn.addEventListener("click", ()=>{
+    if(!confirm("Wipe all data (skills, points, settings)?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = load();
+    save(); renderAll(false);
+  });
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function shortName(name){
+    const max = 18;
+    name = name.replace(/\s+/g,' ').trim();
+    if(name.length <= max) return name;
+    return name.slice(0, max-1) + "…";
+  }
+
+  function renderHeader(){
+    el.asOf.textContent = "As of " + todayStr();
+    el.windowLabel.textContent = clampInt(state.windowDays, 7, 120) + "d";
+  }
+
+  function renderToday(){
+    const d = todayStr();
+    el.todaySkills.innerHTML = "";
+    for(const s of state.skills){
+      const pts = pointsFor(d, s.id);
+
+      const card = document.createElement("div");
+      card.className = "skillCard";
+
+      const top = document.createElement("div");
+      top.className = "skillTop";
+
+      const left = document.createElement("div");
+      left.innerHTML = `<div class="skillName">${escapeHtml(s.name)}</div>
+                        <div class="skillMeta">Today: <span class="mono">0–3</span> points</div>`;
+
+      const right = document.createElement("div");
+      right.className = "btns";
+
+      const minus = document.createElement("button");
+      minus.className = "small";
+      minus.textContent = "−";
+      minus.title = "Decrease";
+      minus.addEventListener("click", ()=>bumpPoints(d, s.id, -1));
+
+      const num = document.createElement("input");
+      num.type = "number";
+      num.min = 0; num.max = 3; num.step = 1;
+      num.value = pts;
+      num.setAttribute("aria-label", s.name + " points today");
+      num.addEventListener("change", ()=>setPoints(d, s.id, num.value));
+
+      const plus = document.createElement("button");
+      plus.className = "small";
+      plus.textContent = "+";
+      plus.title = "Increase";
+      plus.addEventListener("click", ()=>bumpPoints(d, s.id, 1));
+
+      const one = document.createElement("button");
+      one.className = "small";
+      one.textContent = "+1";
+      one.addEventListener("click", ()=>bumpPoints(d, s.id, 1));
+
+      const two = document.createElement("button");
+      two.className = "small";
+      two.textContent = "+2";
+      two.addEventListener("click", ()=>setPoints(d, s.id, 2));
+
+      const three = document.createElement("button");
+      three.className = "small";
+      three.textContent = "+3";
+      three.addEventListener("click", ()=>setPoints(d, s.id, 3));
+
+      right.append(minus, num, plus, one, two, three);
+
+      top.append(left, right);
+      card.appendChild(top);
+      el.todaySkills.appendChild(card);
+    }
+
+    let xpToday = 0;
+    for(const s of state.skills) xpToday += pointsFor(d, s.id);
+    el.xpToday.textContent = xpToday;
+
+    el.dailyQuest.textContent = dailyQuestCompletion(d) ? "Done" : "—";
+
+    const pri = lowestLevelSkill();
+    el.prioritySkill.textContent = pri ? shortName(pri.name) + " (L" + pri.lvl + ")" : "—";
+
+    el.streak.textContent = streakDailyQuest();
+  }
+
+  function renderSkillList(){
+    el.skillList.innerHTML = "";
+    state.skills.forEach((s, idx)=>{
+      const box = document.createElement("div");
+      box.className = "skillCard";
+      box.style.padding = "12px";
+
+      const row = document.createElement("div");
+      row.className = "row";
+      row.style.justifyContent = "space-between";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = s.name;
+      input.addEventListener("change", ()=>{
+        s.name = input.value.trim() || s.name;
+        save(); renderAll(false);
+      });
+
+      const btns = document.createElement("div");
+      btns.className = "btns";
+
+      const up = document.createElement("button");
+      up.className = "small";
+      up.textContent = "↑";
+      up.title = "Move up";
+      up.addEventListener("click", ()=>{
+        if(idx===0) return;
+        const tmp = state.skills[idx-1];
+        state.skills[idx-1] = state.skills[idx];
+        state.skills[idx] = tmp;
+        save(); renderAll(false);
+      });
+
+      const down = document.createElement("button");
+      down.className = "small";
+      down.textContent = "↓";
+      down.title = "Move down";
+      down.addEventListener("click", ()=>{
+        if(idx===state.skills.length-1) return;
+        const tmp = state.skills[idx+1];
+        state.skills[idx+1] = state.skills[idx];
+        state.skills[idx] = tmp;
+        save(); renderAll(false);
+      });
+
+      const del = document.createElement("button");
+      del.className = "small danger";
+      del.textContent = "Delete";
+      del.addEventListener("click", ()=>{
+        if(state.skills.length <= 3){
+          alert("Keep at least 3 skills for the radar chart.");
+          return;
+        }
+        if(!confirm(`Delete skill "${s.name}"?`)) return;
+        state.skills = state.skills.filter(x=>x.id!==s.id);
+        save(); renderAll(false);
+      });
+
+      btns.append(up, down, del);
+
+      row.append(input, btns);
+      box.appendChild(row);
+      el.skillList.appendChild(box);
+    });
+  }
+
+  function renderRadar(){
+    const svg = el.radarSvg;
+    svg.innerHTML = "";
+    const skills = state.skills;
+    const n = skills.length;
+    if(n < 3){
+      svg.innerHTML = `<text x="180" y="180" text-anchor="middle" fill="white" font-size="12">Add at least 3 skills</text>`;
+      return;
+    }
+    const cx = 180, cy = 180;
+    const R = 140;
+    const rings = 5;
+
+    for(let i=1;i<=rings;i++){
+      const r = (R * i / rings);
+      const poly = polygonPoints(n, cx, cy, r, -Math.PI/2, Array(n).fill(10), 10);
+      svg.appendChild(svgEl("polygon", {points: poly, fill:"none", stroke:"rgba(255,255,255,.10)", "stroke-width":"1"}));
+      const lvl = Math.round(10 * i / rings);
+      svg.appendChild(svgEl("text", {x: cx + 6, y: cy - r + 12, fill:"rgba(255,255,255,.35)", "font-size":"10"}, String(lvl)));
+    }
+
+    for(let i=0;i<n;i++){
+      const angle = -Math.PI/2 + i * (2*Math.PI/n);
+      const x = cx + R*Math.cos(angle);
+      const y = cy + R*Math.sin(angle);
+      svg.appendChild(svgEl("line", {x1:cx,y1:cy,x2:x,y2:y, stroke:"rgba(255,255,255,.12)", "stroke-width":"1"}));
+
+      const lx = cx + (R+18)*Math.cos(angle);
+      const ly = cy + (R+18)*Math.sin(angle);
+      const anchor = (Math.cos(angle) > 0.25) ? "start" : (Math.cos(angle) < -0.25 ? "end" : "middle");
+      svg.appendChild(svgEl("text", {x:lx,y:ly, fill:"rgba(232,236,255,.85)", "font-size":"10", "text-anchor":anchor}, shortName(skills[i].name)));
+    }
+
+    const levels = skills.map(s => levelFromXP(xpInWindow(s.id)));
+    const points = polygonPoints(n, cx, cy, R, -Math.PI/2, levels, 10);
+    svg.appendChild(svgEl("polygon", {points, fill:"rgba(106,166,255,.22)", stroke:"rgba(106,166,255,.75)", "stroke-width":"2"}));
+
+    const coords = polygonCoords(n, cx, cy, R, -Math.PI/2, levels, 10);
+    for(const c of coords){
+      svg.appendChild(svgEl("circle", {cx:c.x, cy:c.y, r:"3.2", fill:"rgba(232,236,255,.92)"}));
+    }
+    svg.appendChild(svgEl("circle", {cx, cy, r:"2.4", fill:"rgba(255,255,255,.5)"}));
+  }
+
+  function polygonCoords(n, cx, cy, R, startAngle, levels, maxLevel){
+    const out = [];
+    for(let i=0;i<n;i++){
+      const a = startAngle + i*(2*Math.PI/n);
+      const r = R * (levels[i]/maxLevel);
+      out.push({x: cx + r*Math.cos(a), y: cy + r*Math.sin(a)});
+    }
+    return out;
+  }
+  function polygonPoints(n, cx, cy, R, startAngle, levels, maxLevel){
+    const coords = polygonCoords(n, cx, cy, R, startAngle, levels, maxLevel);
+    return coords.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  }
+  function svgEl(tag, attrs, text){
+    const n = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for(const kv of Object.entries(attrs||{})) n.setAttribute(kv[0], kv[1]);
+    if(text != null) n.textContent = text;
+    return n;
+  }
+
+  function renderLegend(){
+    el.legend.innerHTML = "";
+    for(const s of state.skills){
+      const xp = xpInWindow(s.id);
+      const lvl = levelFromXP(xp);
+      const pill = document.createElement("div");
+      pill.className = "pill";
+      pill.title = `${s.name}: XP=${xp}, Level=${lvl}/10`;
+      pill.innerHTML = `<span class="dot"></span><span>${escapeHtml(shortName(s.name))}: <span class="mono">L${lvl}</span></span>`;
+      el.legend.appendChild(pill);
+    }
+  }
+
+  function renderKPIs(){
+    let sumLvl = 0;
+    let sumXP = 0;
+    for(const s of state.skills){
+      const xp = xpInWindow(s.id);
+      sumXP += xp;
+      sumLvl += levelFromXP(xp);
+    }
+    const avgLvl = state.skills.length ? (sumLvl / state.skills.length) : 0;
+    const pri = lowestLevelSkill();
+    const items = [
+      {v: avgLvl.toFixed(1), t: "Avg level"},
+      {v: sumXP, t: "Total XP (window)"},
+      {v: pri ? "L"+pri.lvl : "—", t: "Lowest level"},
+      {v: pri ? shortName(pri.name) : "—", t: "Priority skill"},
+      {v: clampInt(state.targetXP,10,300), t: "Target XP"},
+      {v: clampInt(state.windowDays,7,120)+"d", t: "Window"}
+    ];
+    el.kpis.innerHTML = "";
+    for(const it of items){
+      const d = document.createElement("div");
+      d.className = "mini";
+      d.innerHTML = `<div class="v">${escapeHtml(String(it.v))}</div><div class="t">${escapeHtml(it.t)}</div>`;
+      el.kpis.appendChild(d);
+    }
+  }
+
+  function renderHistory(){
+    const dates = getHistoryDates().slice().reverse();
+    const skills = state.skills;
+
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    const th0 = document.createElement("th"); th0.textContent = "Date";
+    trh.appendChild(th0);
+    for(const s of skills){
+      const th = document.createElement("th");
+      th.textContent = shortName(s.name);
+      th.title = s.name;
+      trh.appendChild(th);
+    }
+    const thQ = document.createElement("th"); thQ.textContent = "Quest";
+    trh.appendChild(thQ);
+    thead.appendChild(trh);
+
+    const tbody = document.createElement("tbody");
+    for(const d of dates){
+      const tr = document.createElement("tr");
+      const tdDate = document.createElement("td");
+      tdDate.textContent = d;
+      tdDate.className = "mono";
+      tr.appendChild(tdDate);
+
+      for(const s of skills){
+        const td = document.createElement("td");
+        const inp = document.createElement("input");
+        inp.type = "number";
+        inp.min = 0; inp.max = 3; inp.step = 1;
+        inp.value = pointsFor(d, s.id);
+        inp.addEventListener("change", ()=>setPoints(d, s.id, inp.value));
+        td.appendChild(inp);
+        tr.appendChild(td);
+      }
+
+      const tdQuest = document.createElement("td");
+      tdQuest.innerHTML = dailyQuestCompletion(d)
+        ? `<span class="pill"><span class="dot good"></span><span>Done</span></span>`
+        : `<span class="pill"><span class="dot bad"></span><span>—</span></span>`;
+      tr.appendChild(tdQuest);
+
+      tbody.appendChild(tr);
+    }
+
+    el.logTable.innerHTML = "";
+    el.logTable.appendChild(thead);
+    el.logTable.appendChild(tbody);
+  }
+
+  function renderSettings(){
+    el.windowDays.value = clampInt(state.windowDays, 7, 120);
+    el.targetXP.value = clampInt(state.targetXP, 10, 300);
+    el.historyDays.value = clampInt(state.historyDays, 7, 60);
+  }
+
+  function renderAll(light){
+    renderHeader();
+    renderSettings();
+    if(!light || state.activeTab === "today") renderToday();
+    if(!light || state.activeTab === "settings") renderSkillList();
+    if(!light || state.activeTab === "history") renderHistory();
+    if(!light || state.activeTab === "radar"){
+      renderRadar();
+      renderLegend();
+      renderKPIs();
+    }
+  }
+
+  setTab(state.activeTab || "today");
+})();
+</script>
+</body>
+</html>
